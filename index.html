@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choice of pump type Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url(mining.jpg);
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #45a049;
+            }
+
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .error {
+            color: red;
+            display: none;
+        }
+
+        #errors {
+            color: red;
+            display: none;
+        }
+
+        .description {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .conditional-field {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Choice of pump type</h1>
+    <form onsubmit="return validateForm()">
+        <label for="fluidType">Fluid Type:</label>
+        <select id="fluidType" name="fluidType">
+            <option value="Water">Water</option>
+            <option value="Hydrocarbons">Hydrocarbons (Octane case)</option>
+            <option value="Oil">Synthetic Oil</option>
+            <option value="Corrosive Product">Corrosive Product (Acetic acid case)</option>
+            <option value="Air or Gas">Air or Gas</option>
+        </select><br>
+
+        <label for="climateZone">Climate Zone:</label>
+        <select id="climateZone" name="climateZone" onchange="updateEnergySource()">
+            <option value="Warm">Warm</option>
+            <option value="Temperate">Temperate</option>
+            <option value="Cold">Cold</option>
+        </select><br>
+
+        <label for="energySource">Energy Source:</label>
+        <select id="energySource" name="energySource">
+            <!-- Options will be populated based on climate zone selection -->
+        </select><br>
+
+        <label for="temperature">Temperature (in °C):</label>
+        <input type="number" step="any" id="temperature" name="temperature" oninput="validateField(this, 'float', -5, 400)">
+        <span id="temperatureError" class="error">Invalid input. Please enter a float between -5 and 400.</span><br>
+
+        <label for="desiredFlow">Desired Flow (in m<sup>3</sup>/h):</label>
+        <input type="number" step="any" id="desiredFlow" name="desiredFlow" oninput="validateField(this, 'float', 0, Infinity)">
+        <span id="desiredFlowError" class="error">Invalid input. Please enter a strictly positive float.</span><br>
+
+        <label for="suctionLength">Suction Length (in meters):</label>
+        <input type="number" step="any" id="suctionLength" name="suctionLength" oninput="validateField(this, 'float', 0, Infinity)">
+        <span id="suctionLengthError" class="error">Invalid input. Please enter a strictly positive float.</span><br>
+
+        <label for="suctionHeight">Suction Height (in meters):</label>
+        <input type="number" step="any" id="suctionHeight" name="suctionHeight" oninput="validateField(this, 'float', 0, Infinity)">
+        <span id="suctionHeightError" class="error">Invalid input. Please enter a strictly positive float.</span><br>
+
+        <label for="suctionDiameter">Suction Diameter (in mm):</label>
+        <input type="number" step="any" id="suctionDiameter" name="suctionDiameter" oninput="validateField(this, 'float', 50, 600)">
+        <span id="suctionDiameterError" class="error">Please choose a diameter between 50 and 600 mm.</span><br>
+
+        <label for="dischargeLength">Discharge Length (in meters):</label>
+        <input type="number" step="any" id="dischargeLength" name="dischargeLength" oninput="validateField(this, 'float', 0, Infinity)">
+        <span id="dischargeLengthError" class="error">Invalid input. Please enter a strictly positive float.</span><br>
+
+        <label for="dischargeHeight">Discharge Height (in meters):</label>
+        <input type="number" step="any" id="dischargeHeight" name="dischargeHeight" oninput="validateField(this, 'float', 0, Infinity)">
+        <span id="dischargeHeightError" class="error">Invalid input. Please enter a strictly positive float.</span><br>
+
+        <label for="dischargeDiameter">Discharge Diameter (in mm):</label>
+        <input type="number" step="any" id="dischargeDiameter" name="dischargeDiameter" oninput="validateField(this, 'float', 50, 600)">
+        <span id="dischargeDiameterError" class="error">Please choose a diameter between 50 and 600 mm</span><br>
+
+        <label for="numSuctionElbows">Number of Suction Elbows:</label>
+        <input type="number" step="1" id="numSuctionElbows" name="numSuctionElbows" oninput="validateField(this, 'int', 1, Infinity)">
+        <span id="numSuctionElbowsError" class="error">Invalid input. Please enter a strictly positive integer.</span><br>
+
+        <label for="numDischargeElbows">Number of Discharge Elbows:</label>
+        <input type="number" step="1" id="numDischargeElbows" name="numDischargeElbows" oninput="validateField(this, 'int', 2, Infinity)">
+        <span id="numDischargeElbowsError" class="error">Invalid input. Please enter a strictly positive integer.</span><br>
+
+        <label for="elbowsAngle">Elbows' Angle:</label>
+        <input type="number" step="any" id="elbowsAngle" name="elbowsAngle" oninput="validateField(this, 'float', 0, 90)">
+        <span id="elbowsAngleError" class="error">Invalid input. Please enter a float.</span><br>
+
+        <button type="button" onclick={submitForm()}>Results</button>
+    </form>
+
+    <div id="errors"></div>
+    <div id="result"></div>
+
+    <script>
+        function updateEnergySource() {
+            const climateZone = document.getElementById("climateZone").value;
+            const energySource = document.getElementById("energySource");
+            energySource.innerHTML = "";
+
+            let options = [];
+            if (climateZone === "Warm") {
+                options = ["Photovoltaic energy", "Hydroelectric power"];
+            } else if (climateZone === "Temperate") {
+                options = ["Nuclear energy", "Wind energy", "Hydroelectric power"];
+            } else if (climateZone === "Cold") {
+                options = ["Nuclear energy", "Thermal energy"];
+            }
+
+            options.forEach(option => {
+                const opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                energySource.appendChild(opt);
+            });
+        }
+
+
+        function validateField(input, type, minValue, maxValue) {
+            const value = type === 'float' ? parseFloat(input.value) : parseInt(input.value);
+            const errorSpan = document.getElementById(input.id + 'Error');
+
+            if (type === 'int') {
+                if (isNaN(value) || value <= minValue || !Number.isInteger(Number(input.value))) {
+                    errorSpan.style.display = 'block';
+                } else {
+                    errorSpan.style.display = 'none';
+                }
+            } else {
+                if (isNaN(value) || value < minValue || value > maxValue) {
+                    errorSpan.style.display = 'block';
+                } else {
+                    errorSpan.style.display = 'none';
+                }
+            }
+        }
+
+        function VerifySuctionParameters() {
+            const suctionLength = parseFloat(document.getElementById('suctionLength').value);
+            const suctionDiameter = parseFloat(document.getElementById('suctionDiameter').value) * 0.001;
+            const suctionHeight = parseFloat(document.getElementById('suctionHeight').value);
+            const numSuctionElbows = parseFloat(document.getElementById('numSuctionElbows').value);
+
+            let min_value = suctionHeight + 1.5 * numSuctionElbows * suctionDiameter;
+            if (suctionLength < min_value) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        function verifyDischargeDiameter() {
+            const suctionDiameter = parseFloat(document.getElementById('suctionDiameter').value);
+            const dischargeDiameter = parseFloat(document.getElementById('dischargeDiameter').value);
+
+            if (dischargeDiameter > suctionDiameter) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        function VerifyDischargeParameters() {
+            const dischargeLength = parseFloat(document.getElementById('dischargeLength').value);
+            const dischargeDiameter = parseFloat(document.getElementById('dischargeDiameter').value) * 0.001;
+            const dischargeHeight = parseFloat(document.getElementById('dischargeHeight').value);
+            const numDischargeElbows = parseFloat(document.getElementById('numDischargeElbows').value);
+
+            let min_value = dischargeHeight + 1.5 * numDischargeElbows * dischargeDiameter;
+            if (dischargeLength < min_value) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        function verifyTemperatureRange() {
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const fluidType = document.getElementById('fluidType').value;
+
+            let validTemperature = true;
+            let errorTextTemperature = "";
+
+            switch (fluidType) {
+                case 'Water':
+                    if (temperature < 0 || temperature > 100) {
+                        validTemperature = false;
+                        errorTextTemperature = "Invalid temperature range for Water, choose between 0°C and 100°C";
+                        return [validTemperature, errorTextTemperature];
+                    }
+
+                case 'Hydrocarbons':
+                    if (temperature > 128) {
+                        validTemperature = false;
+                        errorTextTemperature = "Invalid temperature range for Octane, choose between -5°C and 128 °C";
+                        return [validTemperature, errorTextTemperature];
+                    }
+
+                case 'Oil':
+                    if (temperature > 150) {
+                        validTemperature = false;
+                        errorTextTemperature = "Invalid temperature range for synthetic oil, choose between -5°C and 150 °C";
+                        return [validTemperature, errorTextTemperature];
+                    }
+
+                case 'Corrosive Product':
+                    if (temperature < 0 || temperature > 118) {
+                        validTemperature = false;
+                        errorTextTemperature = "Invalid temperature range for acetic acid, choose between 0°C and 118 °C";
+                        return [validTemperature, errorTextTemperature];
+                    }
+
+                default:
+                    if (temperature > 400) {
+                        validTemperature = false;
+                        errorTextTemperature = "Invalid temperature range, choose between -5°C and 400 °C";
+                        return [validTemperature, errorTextTemperature];
+                    }
+            }
+            return [validTemperature, errorTextTemperature];
+        }
+
+        function computeViscosity() {
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const fluidType = document.getElementById('fluidType').value;
+
+            let viscosity = 1;
+
+            let viscosity0;
+            let B;
+
+            switch (fluidType) {
+                case 'Water':
+                    viscosity0 = 1.792 * Math.pow(10, -6);
+                    B = 0.03368;
+                    viscosity = viscosity0 * Math.exp(-B * temperature);
+                    return viscosity;
+
+                case 'Hydrocarbons':
+                    viscosity0 = 1.792 * Math.pow(10, -6);
+                    B = 0.02;
+                    viscosity = viscosity0 * Math.exp(-B * (temperature - 20));
+                    return viscosity;
+
+                case 'Oil':
+                    viscosity0 = 100 * Math.pow(10, -6);
+                    B = 0.02;
+                    viscosity = viscosity0 * Math.exp(-B * temperature);
+                    return viscosity;
+
+                case 'Corrosive Product':
+                    viscosity0 = 1.45 * Math.pow(10, -6);
+                    B = 0.02;
+                    viscosity = viscosity0 * Math.exp(-B * temperature);
+                    return viscosity;
+
+                case 'Air or Gas':
+                    let J = 1.48 * Math.pow(10, -5);
+                    let K = 273.15;
+                    let L = 383.55;
+                    let M = 110.4;
+                    viscosity = J * Math.sqrt((temperature + 273.15) / K) * (L / (temperature + 273.15 + M));
+                    return viscosity;
+            }
+            
+        }
+
+        function computeDensity() {
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const fluidType = document.getElementById('fluidType').value;
+
+            let density = 1;
+            let density0;
+            let T0;
+            let alpha, beta;
+            switch (fluidType) {
+                case 'Water':
+                    density0 = 999.87;
+                    beta = 6.69 * Math.pow(10, -2);
+                    alpha = 8.64 * Math.pow(10, -3);
+                    let gamma = 6.79 * Math.pow(10, -5);
+                    let delta = 3.56 * Math.pow(10, -7);
+                    density = density0 + beta * temperature - alpha * Math.pow(temperature, 2) + gamma * Math.pow(temperature, 3) + delta * Math.pow(temperature, 4);
+                    return density;
+
+                case 'Hydrocarbons':
+                    density0 = 703;
+                    T0 = 20;
+                    beta = 0.92;
+                    density = density0 - beta * (temperature - T0);
+                    return density;
+
+                case 'Oil':
+                    density0 = 850;
+                    T0 = 15;
+                    beta = 0.7;
+                    density = density0 - beta * (temperature - T0);
+                    return density;
+
+                case 'Corrosive Product':
+                    density0 = 1049.3;
+                    T0 = 20;
+                    beta = 0.64;
+                    density = density0 - beta * (temperature - T0);
+                    return density;
+
+                case 'Air or Gas':
+                    beta = 0.029;
+                    alpha = 8.134;
+                    density = (beta * Math.pow(10, 5)) / (alpha * temperature);
+                    return density;
+            }
+            
+        }
+
+        function flowControl() {
+            const dischargeDiameter = parseFloat(document.getElementById('dischargeDiameter').value) * 0.001;
+            const viscosity = computeViscosity();
+
+            const flow = parseFloat(document.getElementById('desiredFlow').value) / 3600;
+
+
+            const min_flow_value = (3000 * Math.PI * viscosity * dischargeDiameter) / 4;
+            const max_flow_value = (10000 * Math.PI * viscosity * dischargeDiameter) / 4;
+            console.log(viscosity);
+
+            let validFlow = true;
+            let errorTextFlow = "";
+
+            if (flow < min_flow_value) {
+                validFlow = false;
+                errorTextFlow = `The flow is lesser than the minimum value ${min_flow_value * 3600} m&sup3;/h <br>`;
+            }
+            else if (flow > max_flow_value) {
+                validFlow = false;
+                errorTextFlow = `The flow is higher than the maximum value ${max_flow_value * 3600} m&sup3;/h <br>`;
+            }
+            else if (flow > min_flow_value && flow < max_flow_value) {
+                validFlow = true;
+            }
+            return [validFlow, errorTextFlow];
+
+        }
+
+        function choosePump() {
+            const fluidType = document.getElementById('fluidType').value;
+
+            let pumpName;
+            let pumpImage;
+            switch (fluidType) {
+                case 'Water':
+                    pumpName = "Single-cell centrifugal pump";
+                    pumpImage = "images/monocellulaire.jpg";
+                    return [pumpName, pumpImage];
+
+                case 'Hydrocarbons':
+                    pumpName = "Piston pump";
+                    pumpImage = "images/piston.jpg";
+                    return [pumpName, pumpImage];
+
+                case 'Oil':
+                    pumpName = "Gear pump";
+                    pumpImage = "images/engrenage.jpg";
+                    return [pumpName, pumpImage];
+
+                case 'Corrosive Product':
+                    pumpName = "Membrane pump";
+                    pumpImage = "images/membrane.jpg";
+                    return [pumpName, pumpImage];
+
+                case 'Air or Gas':
+                    pumpName = "Multicellular centrifugal pump";
+                    pumpImage = "images/multicellulaire.jpg";
+                    return [pumpName, pumpImage];
+            }
+            
+        }
+
+        function computeDeltaHeight(flow, viscosity, diameter, length) {
+            const reynolds_number = (4 * flow) / (Math.PI * viscosity * diameter);
+            const lambda = 0.3164 * Math.pow(reynolds_number, -0.25);
+            let fraction = (4 * flow) / (Math.PI * Math.pow(diameter, 2));
+            let g = 9.81;
+            let delta_height = lambda * (length / (2 * g * diameter)) * Math.pow(fraction, 2);
+            return delta_height;
+        }
+
+        function computeDeltaHeightBis(flow, viscosity, diameter, angle) {
+            const g = 9.81;
+            let delta_height_bis = ((16 * Math.pow(flow, 2) * angle) / (Math.pow((Math.PI * diameter), 2) * g * 180)) * (0.13 + Math.pow(diameter, (9 / 2)) * ((Math.PI * viscosity) / (8 * flow)))
+            return delta_height_bis;
+        }
+
+        function computeManometricHeight(flow, viscosity, angle, number_suction_elbows, suction_height, suction_diameter, suction_length, number_discharge_elbows, discharge_height, discharge_diameter, discharge_length) {
+            let delta_suction_height = computeDeltaHeight(flow, viscosity, suction_diameter, suction_length);
+            let delta_discharge_height = computeDeltaHeight(flow, viscosity, discharge_diameter, discharge_length);
+            console.log(delta_discharge_height);
+
+
+            let delta_suction_height_bis = computeDeltaHeightBis(flow, viscosity, suction_diameter, angle);
+            let delta_discharge_height_bis = computeDeltaHeightBis(flow, viscosity, discharge_diameter, angle);
+
+            let manometric_height = suction_height + discharge_height + delta_suction_height + delta_discharge_height + number_suction_elbows * delta_suction_height_bis + number_discharge_elbows * delta_discharge_height_bis;
+
+            return manometric_height;
+        }
+
+        function compileAllErrors() {
+            const errorSpan = document.getElementById("errors");
+            let errorToDisplay = false;
+            let errorText = "";
+
+            let [validFlow, errorTextFlow] = flowControl();
+            let [validTemperature, errorTextTemperature] = verifyTemperatureRange();
+
+            if (!VerifySuctionParameters()) {
+                errorText = errorText + "The suction length is too small in comparison to the others suction parameters<br>";
+                errorToDisplay = true;
+            }
+            if (!VerifySuctionParameters()) {
+                errorText = errorText + "The discharge diameter is too high<br>";
+                errorToDisplay = true;
+            }
+            if (!VerifyDischargeParameters()) {
+                errorText = errorText + "The discharge length is too small in comparison to the others discharge parameters<br>";
+                errorToDisplay = true;
+            }
+            if (!validFlow) {
+                errorText = errorText + errorTextFlow;
+                errorToDisplay = true;
+            }
+            if (!validTemperature) {
+                errorText = errorText + errorTextTemperature;
+                errorToDisplay = true;
+            }
+
+            if (errorSpan) errorSpan.innerHTML = errorText;
+            return errorToDisplay;
+        }
+
+        function validateForm() {
+            const inputs = document.querySelectorAll('#pumpForm input');
+            let isValid = true;
+            const errorSpan = document.getElementById("errors");
+
+            inputs.forEach(input => {
+                const type = input.id.includes('Elbows') ? 'int' : 'float';
+                const minValue = input.id.includes('numSuctionElbows') ? 1 : (input.id.includes('numDischargeElbows') ? 2 : 0);
+                validateField(input, type, minValue);
+                if (document.getElementById(input.id + 'Error').style.display === 'block') {
+                    isValid = false;
+                }
+            });
+
+            if (compileAllErrors()) {
+                errorSpan.style.display = "block";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function submitForm() {
+            const resultDiv = document.getElementById('result');
+
+            if (validateForm()) {
+                const temperature = parseFloat(document.getElementById('temperature').value);
+                const flow = parseFloat(document.getElementById('desiredFlow').value) / 3600;
+                const suctionHeight = parseFloat(document.getElementById('suctionHeight').value);
+                const numSuctionElbows = parseFloat(document.getElementById('numSuctionElbows').value);
+                const suctionLength = parseFloat(document.getElementById('suctionLength').value);
+                const suctionDiameter = parseFloat(document.getElementById('suctionDiameter').value) * 0.001;
+                const dischargeLength = parseFloat(document.getElementById('dischargeLength').value);
+                const dischargeDiameter = parseFloat(document.getElementById('dischargeDiameter').value) * 0.001;
+                const dischargeHeight = parseFloat(document.getElementById('dischargeHeight').value);
+                const numDischargeElbows = parseFloat(document.getElementById('numDischargeElbows').value);
+                const elbowsAngle = parseFloat(document.getElementById('elbowsAngle').value);
+                const viscosity = computeViscosity();
+                const density = computeDensity();
+                const g = 9.81;
+
+                [pumpName, pumpImage] = choosePump();
+
+                let manometric_height = computeManometricHeight(flow, viscosity, elbowsAngle, numSuctionElbows, suctionHeight, suctionDiameter, suctionLength, numDischargeElbows, dischargeHeight, dischargeDiameter, dischargeLength);
+
+                let power = density * g * manometric_height * flow;
+                console.log(density);
+
+                // Create a new image element
+                var img = document.createElement('img');
+
+                // Set the source of the image
+                img.src = pumpImage;
+
+                // Optionally, you can set other attributes like alt, width, height, etc.
+                img.alt = 'Dynamically added image';
+                img.width = 300;  // Set the width in pixels
+                img.height = 200; // Set the height in pixels
+
+                
+
+                resultDiv.innerHTML = ` Manometric height: ${manometric_height} m <br>
+                                    Minimal pump power: ${power} W <br>
+                                    Type of pump: ${pumpName} <br>`;
+
+                // Append the image to the div
+                resultDiv.appendChild(img);
+            }
+            else {
+                resultDiv.innerHTML = "Form data is invalid. Please correct the errors and try again.";
+            }
+        }
+
+        // Initialize energy source options based on default climate zone
+        window.onload = updateEnergySource
+    </script>
+</body>
+</html>
