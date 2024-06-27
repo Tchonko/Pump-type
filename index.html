@@ -402,30 +402,36 @@
 
             let pumpName;
             let pumpImage;
+            let pumpPrice;
             switch (fluidType) {
                 case 'Water':
                     pumpName = "Single-cell centrifugal pump";
                     pumpImage = "images/monocellulaire.jpg";
+                    pumpPrice = "450 000 Frs";
                     return [pumpName, pumpImage];
 
                 case 'Hydrocarbons':
                     pumpName = "Piston pump";
                     pumpImage = "images/piston.jpg";
+                    pumpPrice = "200 000 Frs";
                     return [pumpName, pumpImage];
 
                 case 'Oil':
                     pumpName = "Gear pump";
                     pumpImage = "images/engrenage.jpg";
+                    pumpPrice = "250 000 Frs";
                     return [pumpName, pumpImage];
 
                 case 'Corrosive Product':
                     pumpName = "Membrane pump";
                     pumpImage = "images/membrane.jpg";
+                    pumpPrice = "300 000 Frs";
                     return [pumpName, pumpImage];
 
                 case 'Air or Gas':
                     pumpName = "Multicellular centrifugal pump";
                     pumpImage = "images/multicellulaire.jpg";
+                    pumpPrice = "650 000 Frs";
                     return [pumpName, pumpImage];
             }
             
@@ -449,7 +455,6 @@
         function computeManometricHeight(flow, viscosity, angle, number_suction_elbows, suction_height, suction_diameter, suction_length, number_discharge_elbows, discharge_height, discharge_diameter, discharge_length) {
             let delta_suction_height = computeDeltaHeight(flow, viscosity, suction_diameter, suction_length);
             let delta_discharge_height = computeDeltaHeight(flow, viscosity, discharge_diameter, discharge_length);
-            console.log(delta_discharge_height);
 
 
             let delta_suction_height_bis = computeDeltaHeightBis(flow, viscosity, suction_diameter, angle);
